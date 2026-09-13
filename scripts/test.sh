@@ -11,3 +11,10 @@ swiftc -swift-version 6 -parse-as-library Sources/ClipNest/ThumbnailLoader.swift
 
 swiftc -swift-version 6 -parse-as-library Sources/ClipNest/KeyboardRouting.swift Tests/ClipNestTests/KeyboardRoutingChecks.swift -o .build/checks/keyboard-checks
 .build/checks/keyboard-checks
+
+swiftc -swift-version 6 -parse-as-library \
+  Sources/ClipNest/HistoryStore.swift Sources/ClipNest/HistoryView.swift \
+  Sources/ClipNest/LoginItemSettings.swift Sources/ClipNest/ThumbnailLoader.swift \
+  Sources/ClipNest/ScrollIndicatorSuppressor.swift Tests/ClipNestTests/HistoryScrollChecks.swift \
+  -o .build/checks/scroll-checks
+.build/checks/scroll-checks

@@ -47,7 +47,7 @@ struct HistoryView: View {
                 }.frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollViewReader { proxy in
-                    ScrollView(.horizontal) {
+                    ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: 12) {
                             ForEach(store.filtered) { clip in
                                 ClipCard(store: store, clip: clip, selected: store.selectedID == clip.id)
@@ -67,7 +67,9 @@ struct HistoryView: View {
                                     .id(clip.id)
                             }
                         }.padding(3)
+                            .background(ScrollIndicatorSuppressor())
                     }
+                    .scrollIndicators(.hidden)
                     .onChange(of: store.selectedID) { _, id in if let id { proxy.scrollTo(id) } }
                 }
             }
@@ -309,7 +311,7 @@ struct SettingsView: View {
                 if let error = store.storageError { Text(error).foregroundStyle(.red).font(.caption) }
             }
             HStack {
-                Text("ClipNest · 剪贴巢 0.1").foregroundStyle(.secondary)
+                Text("ClipNest · 剪贴巢 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "开发版")").foregroundStyle(.secondary)
                 Spacer()
                 Button("退出 ClipNest") { NSApplication.shared.terminate(nil) }
             }
