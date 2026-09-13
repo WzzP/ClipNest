@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ClipNest}",
+            "name": "Debug ClipNest",
+            "target": "ClipNest",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug ClipNest"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ClipNest}",
+            "name": "Release ClipNest",
+            "target": "ClipNest",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release ClipNest"
+        }
+    ]
+}
