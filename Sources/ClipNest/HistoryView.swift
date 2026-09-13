@@ -76,8 +76,8 @@ struct HistoryView: View {
             footer
             if let error = store.storageError {
                 Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.red)
-            } else {
-                Text(store.notice.isEmpty ? store.captureStatus : store.notice)
+            } else if !store.notice.isEmpty {
+                Text(store.notice)
                     .font(.caption).foregroundStyle(.secondary).lineLimit(1)
             }
         }
@@ -114,11 +114,6 @@ struct HistoryView: View {
                         .buttonStyle(.plain).accessibilityLabel("清除搜索")
                 }
             }.padding(6).background(.background.opacity(0.7), in: RoundedRectangle(cornerRadius: 8))
-            Button("读取当前剪贴板") { store.notice = ""; store.readCurrentClipboard() }
-                .help("重新读取当前剪贴板中的文本、图片或文件")
-            Button { store.paused.toggle() } label: {
-                Image(systemName: store.paused ? "play.fill" : "pause.fill")
-            }.help(store.paused ? "恢复记录" : "暂停记录").accessibilityLabel(store.paused ? "恢复记录" : "暂停记录")
             Button(action: settings) { Image(systemName: "gearshape") }.help("设置").accessibilityLabel("设置")
         }
     }
@@ -129,15 +124,13 @@ struct HistoryView: View {
                 .foregroundStyle(store.paused ? .orange : .secondary)
             Text("· \(store.filtered.count) 条").foregroundStyle(.secondary)
             Spacer()
-            Text("↑ ↓ 选择  ·  ↵ 粘贴").foregroundStyle(.secondary)
+            Text("← → 选择  ·  ↵ 粘贴").foregroundStyle(.secondary)
             Button { store.previewing.toggle(); searching = false } label: { Image(systemName: "eye") }
                 .help("预览（卡片选中时按空格）").accessibilityLabel("预览").disabled(store.selected == nil)
             Button {
                 if let clip = store.selected { store.toggleFavorite(clip.id) }
             } label: { Image(systemName: store.selected?.favorite == true ? "star.fill" : "star") }
                 .accessibilityLabel(store.selected?.favorite == true ? "取消收藏" : "收藏").disabled(store.selected == nil)
-            Button("复制", action: copy).disabled(store.selected == nil)
-            Button("粘贴 ↵", action: paste).buttonStyle(.borderedProminent).disabled(store.selected == nil)
         }.font(.caption)
     }
 }
@@ -292,26 +285,19 @@ struct SettingsView: View {
                     Button("打开辅助功能设置") {
                         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
                     }
-                    Button("重新检查") { accessibilityAllowed = AXIsProcessTrusted() }
                 }
                 if !accessibilityAllowed {
-                    Text("若开关已打开，请移除旧 ClipNest，再添加当前应用并开启。开发版更新后签名可能变化；重新授权后重启应用。复制历史不需要辅助功能权限。")
+                    Text("允许辅助功能后，可双击记录或按回车粘贴；也可右键复制后自行粘贴。")
                         .font(.caption).foregroundStyle(.secondary)
-                    Button("在 Finder 中显示当前应用") {
-                        NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
-                    }
                 }
             }
             Section("隐私与存储") {
-                Text("排除应用的 Bundle ID（每行一个）").font(.caption)
-                TextEditor(text: $store.excludedApplications).font(.system(.caption, design: .monospaced)).frame(height: 64)
                 Text("仅保存在本机；尊重敏感剪贴板标记。收藏不受数量上限影响。").font(.caption).foregroundStyle(.secondary)
-                Button("在 Finder 中显示历史文件") { NSWorkspace.shared.selectFile(store.storagePath, inFileViewerRootedAtPath: "") }
                 Button("清空普通历史…", role: .destructive) { confirmingClear = true }
                 if let error = store.storageError { Text(error).foregroundStyle(.red).font(.caption) }
             }
             HStack {
-                Text("ClipNest · 剪贴巢 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "开发版")").foregroundStyle(.secondary)
+                Text("ClipNest · 剪贴巢 \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")").foregroundStyle(.secondary)
                 Spacer()
                 Button("退出 ClipNest") { NSApplication.shared.terminate(nil) }
             }

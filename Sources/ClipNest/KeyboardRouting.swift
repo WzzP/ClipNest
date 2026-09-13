@@ -14,8 +14,6 @@ enum KeyboardRouting {
         guard modifiers.intersection([.command, .control, .option]).isEmpty else { return .passThrough }
         switch keyCode {
         case 53: return .dismiss
-        case 125: return .move(1)
-        case 126: return .move(-1)
         case 123 where !editing: return .move(-1)
         case 124 where !editing: return .move(1)
         case 49 where !editing: return .preview

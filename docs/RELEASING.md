@@ -1,6 +1,6 @@
 # 发布 ClipNest
 
-版本由仓库根目录 `VERSION` 管理，当前为 `0.1.1`，对应 Git tag `v0.1.1`。Release 是否标记为正式版，与是否通过 Apple 签名/公证是两个不同维度；未公证包必须明确披露。
+版本由仓库根目录 `VERSION` 管理，当前为 `0.1.2`，对应 Git tag `v0.1.2`。Release 是否标记为正式版，与是否通过 Apple 签名/公证是两个不同维度；未公证包必须明确披露。
 
 ## 1. 发布前验证
 
@@ -26,9 +26,9 @@
 输出：
 
 ```text
-.build/releases/0.1.1/local/
+.build/releases/0.1.2/local/
 ├── ClipNest.app
-├── ClipNest-0.1.1-universal-unsigned.zip
+├── ClipNest-0.1.2-universal-unsigned.zip
 └── SHA256SUMS.txt
 ```
 
@@ -76,33 +76,33 @@ CLIPNEST_NOTARY_PROFILE="ClipNest-Notary" \
 4. 将公证票据附加到 `.app`，验证票据、代码签名和 Gatekeeper。
 5. 重新打包最终 ZIP，并生成 SHA-256 校验值。
 
-结果位于 `.build/releases/0.1.1/notarized/`。只上传最终 `ClipNest-0.1.1-universal.zip` 与 `SHA256SUMS.txt`；不要上传中间的 `notary-upload.zip` 或公证日志。签名、公证任何一步失败，脚本都会停止。
+结果位于 `.build/releases/0.1.2/notarized/`。只上传最终 `ClipNest-0.1.2-universal.zip` 与 `SHA256SUMS.txt`；不要上传中间的 `notary-upload.zip` 或公证日志。签名、公证任何一步失败，脚本都会停止。
 
 ## 4. 创建 GitHub Release
 
 确认构建对应的源码已经提交并推送，再创建 tag：
 
 ```sh
-git tag -a v0.1.1 -m "ClipNest 0.1.1"
-git push origin v0.1.1
+git tag -a v0.1.2 -m "ClipNest 0.1.2"
+git push origin v0.1.2
 ```
 
 在 GitHub 仓库 **Releases → Draft a new release** 中：
 
-- 选择 `v0.1.1`，标题使用 `ClipNest 0.1.1`。
-- 说明使用 `docs/releases/v0.1.1.md`。
+- 选择 `v0.1.2`，标题使用 `ClipNest 0.1.2`。
+- 说明使用 `docs/releases/v0.1.2.md`。
 - 上传 ZIP 与 `SHA256SUMS.txt`。
-- 作为正式 0.1.1 版本发布时，不勾选 Pre-release。
+- 作为正式 0.1.2 版本发布时，不勾选 Pre-release。
 - 如果将来上传已公证包，先同步修改 Release 说明中的签名状态和文件名。
 
 若已安装并登录 GitHub CLI，也可以创建草稿：
 
 ```sh
-gh release create v0.1.1 \
-  .build/releases/0.1.1/local/ClipNest-0.1.1-universal-unsigned.zip \
-  .build/releases/0.1.1/local/SHA256SUMS.txt \
+gh release create v0.1.2 \
+  .build/releases/0.1.2/local/ClipNest-0.1.2-universal-unsigned.zip \
+  .build/releases/0.1.2/local/SHA256SUMS.txt \
   --repo WzzP/ClipNest --verify-tag --draft \
-  --title "ClipNest 0.1.1" --notes-file docs/releases/v0.1.1.md
+  --title "ClipNest 0.1.2" --notes-file docs/releases/v0.1.2.md
 ```
 
 草稿核对后再点击 Publish release。不要覆盖已发布 tag；后续修复使用新版本号。

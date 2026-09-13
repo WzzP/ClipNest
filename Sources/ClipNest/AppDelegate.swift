@@ -95,8 +95,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         statusItem.button?.toolTip = "\(name) · \(shortcut)"
         if result != noErr {
             store.notice = "\(shortcut) 注册失败（\(result)），请点击菜单栏打开。"
-        } else if sandbox {
-            store.notice = "按 \(shortcut) 唤起"
         }
         if sandbox {
             let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -138,7 +136,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private func paste() {
         guard !pastePending, store.selected != nil else { return }
         guard AXIsProcessTrusted() else {
-            store.notice = "当前版本未通过辅助功能检查。已授权过的话，请在系统设置重新添加此版本；可先用「复制」。齿轮 → 自动粘贴查看详情。"
+            store.notice = "自动粘贴需要辅助功能权限，请在设置中授权；也可右键记录选择「复制」。"
             return
         }
         guard let target, !target.isTerminated, target.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
@@ -176,7 +174,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard panel.isKeyWindow else { return event }
         let editor = panel.firstResponder as? NSTextView
         let action = KeyboardRouting.action(keyCode: event.keyCode,
-                                            editing: editor != nil,
+                                            editing: editor != nil && !store.query.isEmpty,
                                             composing: editor?.hasMarkedText() == true,
                                             modifiers: event.modifierFlags)
         switch action {

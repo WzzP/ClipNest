@@ -5,6 +5,7 @@ import SwiftUI
     @MainActor static func main() {
         let app = NSApplication.shared
         app.setActivationPolicy(.prohibited)
+        if CommandLine.arguments.contains("--screenshot") { app.applicationIconImage = NSImage(contentsOfFile: "docs/assets/app-icon.png") }
         // Process-local preference: do not change the user's system settings.
         UserDefaults.standard.register(defaults: ["AppleShowScrollBars": "Always"])
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ClipNest-Scroll-\(UUID().uuidString)")
@@ -33,6 +34,18 @@ import SwiftUI
         view.layoutSubtreeIfNeeded()
         RunLoop.main.run(until: Date().addingTimeInterval(0.2))
         precondition(strips.allSatisfy { !$0.hasHorizontalScroller && !$0.hasVerticalScroller })
+        if CommandLine.arguments.contains("--screenshot") {
+            store.clearHistory()
+            for (text, source) in [("周末计划\n整理书桌，读完一本书，去公园散步。", "备忘录"), ("https://github.com/WzzP/ClipNest", "Safari"), ("会议纪要\n确认本周安排，周五一起回顾进展。", "备忘录"), ("让复制过的内容，随时找得到。", "ClipNest")] {
+                store.insert(text: text, source: source)
+            }
+            store.toggleFavorite(store.clips[0].id)
+            view.layoutSubtreeIfNeeded()
+            RunLoop.main.run(until: Date().addingTimeInterval(0.5))
+            let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
+            view.cacheDisplay(in: view.bounds, to: bitmap)
+            try! bitmap.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: "docs/assets/app-screenshot.png"))
+        }
         print("PASS: overflowing history hides native scrollbars and remains scrollable")
     }
 }
