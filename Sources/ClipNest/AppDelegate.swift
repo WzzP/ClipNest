@@ -135,18 +135,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func paste() {
         guard !pastePending, store.selected != nil else { return }
-        guard AXIsProcessTrusted() else {
-            store.notice = "自动粘贴需要辅助功能权限，请在设置中授权；也可右键记录选择「复制」。"
-            return
-        }
-        guard let target, !target.isTerminated, target.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
-            store.notice = "没有可用的目标应用，请使用「复制」。"
-            return
-        }
+        // Copy is independent of Accessibility permission and target availability.
         guard store.copySelected() else { return }
-        pastePending = true
         panel.orderOut(nil)
+        guard let target, !target.isTerminated, target.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
+            store.notice = "已复制，请在目标应用按 ⌘V。"
+            return
+        }
         target.activate()
+        guard AXIsProcessTrusted() else {
+            store.notice = "已复制，请按 ⌘V 粘贴；自动粘贴可在设置中授权。"
+            return
+        }
+        pastePending = true
         Task { @MainActor [weak self] in
             guard let self else { return }
             defer { self.pastePending = false }
