@@ -8,7 +8,7 @@
 
 ClipNest 是一个原生 macOS 剪贴板管理工具。平时常驻菜单栏，按 **⌘⇧V** 唤出屏幕底部的历史卡片栏，搜索、预览，再复制或粘贴到原来的应用。
 
-使用 **SwiftUI + AppKit** 构建，无需账号，历史保存在本机。当前版本为 **0.1.0**。
+使用 **SwiftUI + AppKit** 构建，无需账号，历史保存在本机。当前版本为 **0.1.1**。
 
 ## 功能
 
@@ -20,11 +20,11 @@ ClipNest 是一个原生 macOS 剪贴板管理工具。平时常驻菜单栏，�
 - **记录控制**：暂停记录、排除指定应用、跳过常见敏感剪贴板标记。
 - **登录启动**：可在设置中开启，登录 macOS 后在后台运行。
 
-## 0.1.0 发布包
+## 0.1.1 发布包
 
 通用 ZIP 同时包含 Apple Silicon 和 Intel 架构，可通过 `./scripts/package-release.sh local` 生成。当前未加入 Apple Developer Program，发布包使用 ad-hoc 签名、没有 Apple 公证，首次打开可能需要按 [Apple 官方说明](https://support.apple.com/guide/mac-help/mh40616/mac)在系统设置中允许。
 
-完整的打包、签名、公证与 GitHub Release 步骤见 [发布指南](docs/RELEASING.md)，发布说明见 [0.1.0](docs/releases/v0.1.0.md)。
+完整的打包、签名、公证与 GitHub Release 步骤见 [发布指南](docs/RELEASING.md)，发布说明见 [0.1.1](docs/releases/v0.1.1.md)。
 
 ## 构建与运行
 
@@ -34,14 +34,14 @@ ClipNest 是一个原生 macOS 剪贴板管理工具。平时常驻菜单栏，�
 git clone https://github.com/WzzP/ClipNest.git
 cd ClipNest
 ./scripts/build-app.sh
-open .build/ClipNest.app
+open .build/sandbox/ClipNest.app
 ```
 
-脚本编译 Release 版本、生成应用图标，并打包为 `.build/ClipNest.app`。默认使用本地临时签名，**没有 Developer ID 发布签名，尚未公证**。
+脚本编译 Release 版本、生成应用图标，并打包为 `.build/sandbox/ClipNest.app`。默认使用本地临时签名，**没有 Developer ID 发布签名，尚未公证**。
 
 日常使用建议将生成的 `ClipNest.app` 放到“应用程序”目录，再从那里启动，并保持应用路径固定。不要同时运行多个副本，以免快捷键冲突。
 
-开发时也可以直接运行：
+仅调试源码时也可以直接运行（不启用沙盒，不能替代打包验证）：
 
 ```sh
 swift run ClipNest
@@ -50,7 +50,7 @@ swift run ClipNest
 登录启动需要运行打包后的 `.app`。静默启动可使用：
 
 ```sh
-open .build/ClipNest.app --args --background
+open .build/sandbox/ClipNest.app --args --background
 ```
 
 ## 使用方式
@@ -99,7 +99,7 @@ CLIPNEST_SIGN_IDENTITY="证书名称或指纹" ./scripts/build-app.sh
 数据目录：
 
 ```text
-~/Library/Application Support/ClipNest/
+~/Library/Containers/com.clipnest.sandbox/Data/Library/Application Support/ClipNest/
 ├── history.json     # 内容、来源、收藏及文件路径
 └── Attachments/     # 图片原始数据
 ```
@@ -109,6 +109,8 @@ CLIPNEST_SIGN_IDENTITY="证书名称或指纹" ./scripts/build-app.sh
 - 删除或淘汰历史时，清理不再使用的图片附件；**不会删除原文件**。
 - 历史为本机明文数据，文件权限限制为当前用户读写。敏感标记过滤依赖来源应用，不能识别所有密码；可通过应用 Bundle ID 配置排除列表。
 - 历史文件无法解析时停止覆盖并显示错误。备份时请保留整个数据目录。
+
+0.1.1 启用 App Sandbox，应用名称仍为 ClipNest。旧版本位于 `~/Library/Application Support/ClipNest/` 的历史不会自动迁移，也不会被删除。自动粘贴和外部文件跨重启权限尚未完整验证；可先用“复制”后手动按 ⌘V。快捷键被占用时自动改用 **⌃⌘⇧V**，实际组合见菜单栏提示。
 
 ## 当前限制
 
@@ -124,6 +126,7 @@ CLIPNEST_SIGN_IDENTITY="证书名称或指纹" ./scripts/build-app.sh
 ```sh
 swift build
 ./scripts/test.sh
+./scripts/test-sandbox.sh
 ```
 
 测试脚本可在 Command Line Tools 环境运行，无需 XCTest。包含 12 项历史行为检查，以及后台缩略图生成、缓存、缺失附件与输入法按键路由检查；使用隔离数据目录与命名剪贴板，不修改系统通用剪贴板。

@@ -21,6 +21,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        if Bundle.main.bundleIdentifier == "com.clipnest.sandbox", SandboxValidation.runIfRequested() {
+            NSApp.terminate(nil)
+            return
+        }
         store.startMonitoring()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "clipboard", accessibilityDescription: "ClipNest 剪贴板历史")
@@ -70,15 +74,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     private func registerHotKey() {
         var spec = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
-        InstallEventHandler(GetApplicationEventTarget(), { _, _, context in
+        let handlerResult = InstallEventHandler(GetApplicationEventTarget(), { _, _, context in
             guard let context else { return OSStatus(eventNotHandledErr) }
             MainActor.assumeIsolated {
                 Unmanaged<AppDelegate>.fromOpaque(context).takeUnretainedValue().togglePanel()
             }
             return noErr
         }, 1, &spec, Unmanaged.passUnretained(self).toOpaque(), &eventHandler)
-        let result = RegisterEventHotKey(UInt32(kVK_ANSI_V), UInt32(cmdKey | shiftKey), EventHotKeyID(signature: 0x434C504E, id: 1), GetApplicationEventTarget(), 0, &hotKey)
-        if result != noErr { store.notice = "⌘⇧V 注册失败，可能已被占用。请点击菜单栏打开。" }
+        let sandbox = Bundle.main.bundleIdentifier == "com.clipnest.sandbox"
+        var shortcut = "⌘⇧V"
+        var result = handlerResult
+        if handlerResult == noErr {
+            result = RegisterEventHotKey(UInt32(kVK_ANSI_V), UInt32(cmdKey | shiftKey), EventHotKeyID(signature: 0x434C504E, id: 1), GetApplicationEventTarget(), 0, &hotKey)
+            if result != noErr && sandbox {
+                shortcut = "⌃⌘⇧V"
+                result = RegisterEventHotKey(UInt32(kVK_ANSI_V), UInt32(cmdKey | shiftKey | controlKey), EventHotKeyID(signature: 0x434C504E, id: 1), GetApplicationEventTarget(), 0, &hotKey)
+            }
+        }
+        let name = "ClipNest"
+        statusItem.button?.toolTip = "\(name) · \(shortcut)"
+        if result != noErr {
+            store.notice = "\(shortcut) 注册失败（\(result)），请点击菜单栏打开。"
+        } else if sandbox {
+            store.notice = "按 \(shortcut) 唤起"
+        }
+        if sandbox {
+            let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("SandboxValidation", isDirectory: true)
+            try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+            let report: [String: Any] = ["shortcut": shortcut, "handlerStatus": handlerResult, "registrationStatus": result]
+            if let data = try? JSONSerialization.data(withJSONObject: report, options: [.prettyPrinted]) {
+                try? data.write(to: directory.appendingPathComponent("hotkey.json"), options: .atomic)
+            }
+        }
     }
 
     @objc func togglePanel() {
