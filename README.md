@@ -8,7 +8,7 @@
 
 ClipNest 是一个原生 macOS 剪贴板管理工具。平时常驻菜单栏，按 **⌘⇧V** 唤出屏幕底部的历史卡片栏，搜索、预览，再复制或粘贴到原来的应用。
 
-使用 **SwiftUI + AppKit** 构建，无需账号，历史保存在本机。当前版本为 **0.1.2**。
+使用 **SwiftUI + AppKit** 构建，无需账号，历史保存在本机。当前版本为 **0.1.3**。
 
 ## 应用截图
 
@@ -26,11 +26,11 @@ ClipNest 是一个原生 macOS 剪贴板管理工具。平时常驻菜单栏，�
 - **记录控制**：在设置中暂停记录、跳过常见敏感剪贴板标记。
 - **登录启动**：可在设置中开启，登录 macOS 后在后台运行。
 
-## 0.1.2 发布包
+## 0.1.3 发布包
 
 通用 ZIP 同时包含 Apple Silicon 和 Intel 架构，可通过 `./scripts/package-release.sh local` 生成。当前未加入 Apple Developer Program，发布包使用 ad-hoc 签名、没有 Apple 公证，首次打开可能需要按 [Apple 官方说明](https://support.apple.com/guide/mac-help/mh40616/mac)在系统设置中允许。
 
-完整的打包、签名、公证与 GitHub Release 步骤见 [发布指南](docs/RELEASING.md)，发布说明见 [0.1.2](docs/releases/v0.1.2.md)。
+完整的打包、签名、公证与 GitHub Release 步骤见 [发布指南](docs/RELEASING.md)，发布说明见 [0.1.3](docs/releases/v0.1.3.md)。
 
 ## 构建与运行
 
